@@ -1,4 +1,3 @@
-
 var data = [];
 var step = 2.9;
 for(var i=0;i<500;i++){
@@ -108,14 +107,19 @@ warning_check();
 
 function zoomFunction(){
     // create new scale ojects based on event
-    var new_xScale = d3.event.transform.rescaleX(xAxisScale)
-    // var new_yScale = d3.event.transform.rescaleY(yAxisScale)
-    var new_xAxisScale;
-    //prevent from getting out of min value of X axis
-    if (new_xScale.domain()[0]>=0)
-        new_xAxisScale= d3.scaleLinear().domain([new_xScale.domain()[0],new_xScale.domain()[1]]).range([0,width]);
-    else
-        new_xAxisScale= d3.scaleLinear().domain([0,new_xScale.domain()[1]]).range([0,width]);
+    var _xAxisScale = d3.event.transform.rescaleX(xAxisScale)
+    // var _yAxisScale = d3.event.transform.rescaleY(yAxisScale)
+    console.log(d3.event.transform.k)
+    var new_domain = [_xAxisScale.domain()[0],_xAxisScale.domain()[1]];
+    if(_xAxisScale.domain()[0]<0){
+        new_domain[0] = 0;
+        new_domain[1] = _xAxisScale.domain()[1] - _xAxisScale.domain()[0];
+    }
+
+    //prevent from getting out of range 
+    console.log(_xAxisScale.domain()[0],_xAxisScale.domain()[1]);
+    var new_xAxisScale= d3.scaleLinear().domain(new_domain).range([0,width]);
+
     // update axes
     gX.call(d3.axisBottom(new_xAxisScale)
             .ticks((width + 2) / (height + 2) * 10)
@@ -137,9 +141,7 @@ function dragstarted(d) {
 }
 
 function dragged(d) {
-    console.log(red_warning);
     red_warning=yAxisScale.invert(d3.event.y);
-    console.log(red_warning);
     if(red_warning<=yDomain[1] && red_warning>=yDomain[0])
         d3.select(this).attr("d", function(){return refData(d)});
 }
